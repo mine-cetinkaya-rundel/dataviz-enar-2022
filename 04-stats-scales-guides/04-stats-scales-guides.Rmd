@@ -835,6 +835,14 @@ class: middle
 
 ---
 
+## Asking good questions
+
+- Describe what you want
+- Describe where you are
+- Create a minimal **repr**oducible **ex**ample: [`reprex::reprex()`](https://reprex.tidyverse.org/)
+
+---
+
 ## Community
 
 - Tidy Tuesday: https://github.com/rfordatascience/tidytuesday
