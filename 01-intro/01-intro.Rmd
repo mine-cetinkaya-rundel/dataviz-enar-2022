@@ -16,7 +16,7 @@ output:
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(
-  fig.width = 8, fig.asp = 0.518, fig.retina = 3, dpi = 200,
+  fig.width = 8, fig.asp = 0.518, fig.retina = 3, dpi = 300,
   out.width = "100%",
   cache = FALSE,
   echo = FALSE,
