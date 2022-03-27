@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>03 - geoms</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="  dr. mine çetinkaya-rundel   duke university &amp; rstudio" />
+    <script src="03-geoms_files/header-attrs/header-attrs.js"></script>
+    <link href="03-geoms_files/panelset/panelset.css" rel="stylesheet" />
+    <script src="03-geoms_files/panelset/panelset.js"></script>
+    <link href="03-geoms_files/countdown/countdown.css" rel="stylesheet" />
+    <script src="03-geoms_files/countdown/countdown.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# 03 - geoms
+## Data visualization in R
+### <br> dr. mine çetinkaya-rundel <br> duke university &amp; rstudio
+
+---
+
+
+
+
+
+
+class: middle, inverse
+
+# Setup
+
+---
+
+## Packages
+
+
+```r
+# load packages
+library(tidyverse)
+library(openintro)
+```
+
+---
+
+## ggplot2 theme
+
+
+```r
+# set default theme for ggplot2
+ggplot2::theme_set(ggplot2::theme_minimal(base_size = 16))
+```
+
+---
+
+## Figure sizing
+
+For more on including figures in R Markdown documents with the right size, resolution, etc. the following resources are great:
+
+- [R for Data Science - Graphics for communication](https://r4ds.had.co.nz/graphics-for-communication.html)
+- [Tips and tricks for working with images and figures in R Markdown documents](https://www.zevross.com/blog/2017/06/19/tips-and-tricks-for-working-with-images-and-figures-in-r-markdown-documents/)
+
+
+```r
+# set default figure parameters for knitr
+knitr::opts_chunk$set(
+  fig.width = 8,     # 8"
+  fig.asp = 0.618,   # the golden ratio
+  fig.retina = 3,    # dpi multiplier for displaying HTML output on retina
+  dpi = 300,         # higher dpi, sharper image
+  out.width = "60%"
+)
+```
+
+---
+
+## Data prep: new variables
+
+From last class...
+
+
+```r
+duke_forest &lt;- duke_forest %&gt;%
+  mutate(
+    decade_built = (year_built %/% 10) * 10,
+    decade_built_cat = case_when(
+      decade_built &lt;= 1940 ~ "1940 or before",
+      decade_built &gt;= 1990 ~ "1990 or after",
+      TRUE                 ~ as.character(decade_built)
+    ),
+    decade_built_cat = factor(decade_built_cat, ordered = TRUE)
+  )
+
+duke_forest %&gt;%
+  select(year_built, decade_built, decade_built_cat)
+```
+
+```
+## # A tibble: 98 × 3
+##    year_built decade_built decade_built_cat
+##         &lt;dbl&gt;        &lt;dbl&gt; &lt;ord&gt;           
+##  1       1972         1970 1970            
+##  2       1969         1960 1960            
+##  3       1959         1950 1950            
+##  4       1961         1960 1960            
+##  5       2020         2020 1990 or after   
+##  6       2014         2010 1990 or after   
+##  7       1968         1960 1960            
+##  8       1973         1970 1970            
+##  9       1972         1970 1970            
+## 10       1964         1960 1960            
+## # … with 88 more rows
+```
+
+---
+
+## Data prep: summary table
+
+From last class...
+
+
+```r
+mean_area_decade &lt;- duke_forest %&gt;%
+  group_by(decade_built_cat) %&gt;%
+  summarise(mean_area = mean(area))
+
+mean_area_decade
+```
+
+```
+## # A tibble: 6 × 2
+##   decade_built_cat mean_area
+##   &lt;ord&gt;                &lt;dbl&gt;
+## 1 1940 or before       2072.
+## 2 1950                 2545.
+## 3 1960                 2873.
+## 4 1970                 3413.
+## 5 1980                 2889.
+## 6 1990 or after        2822.
+```
+
+---
+
+class: middle, inverse
+
+# Aesthetic mappings in ggplot2
+
+---
+
+## Global vs. layer-specific aesthetics
+
+- Aesthetic mappings can be supplied in the initial `ggplot()` call, in individual layers, or in some combination of both.
+
+- Within each layer, you can add, override, or remove mappings.
+
+- If you only have one layer in the plot, the way you specify aesthetics doesn’t make any difference. However, the distinction is important when you start adding additional layers.
+
+---
+
+## Activity: Spot the difference I
+
+.task[
+Do you expect the following plots to be the same or different? If different, how? Discuss in a pair (or group) without running the code and sketch the resulting plots based on what you think the code will produce.
+]
+
+.panelset[
+.panel[.panel-name[Plots]
+
+```r
+# Plot A
+ggplot(duke_forest, aes(x = area, y = price, color = decade_built_cat)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, size = 0.5)
+```
+
+```r
+# Plot B
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point(aes(color = decade_built_cat), alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, size = 0.5)
+```
+]
+.panel[.panel-name[Discuss]
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+]
+]
+
+<div class="countdown" id="timer_623fdcea" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">05</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## Activity: Spot the difference II
+
+.task[
+Do you expect the following plots to be the same or different? If different, how? Discuss in a pair (or group) without running the code and sketch the resulting plots based on what you think the code will produce.
+]
+
+.panelset[
+.panel[.panel-name[Plots]
+
+```r
+# Plot A
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point(aes(color = decade_built_cat))
+```
+
+```r
+# Plot B
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point(color = "blue")
+```
+
+```r
+# Plot C
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point(color = "#a493ba")
+```
+]
+.panel[.panel-name[Discuss]
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+]
+]
+
+<div class="countdown" id="timer_623fdd34" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+class: middle, inverse
+
+# Geoms
+
+---
+
+## Geoms
+
+- Geometric objects, or geoms for short, perform the actual rendering of the layer, controlling the type of plot that you create
+
+- You can think of them as "the geometric shape used to represent the data"
+
+---
+
+## One variable
+
+- Discrete:
+  - `geom_bar()`: display distribution of discrete variable.
+
+- Continuous
+  - `geom_histogram()`: bin and count continuous variable, display with bars
+  - `geom_density()`: smoothed density estimate
+  - `geom_dotplot()`: stack individual points into a dot plot
+  - `geom_freqpoly()`: bin and count continuous variable, display with lines
+
+---
+
+## .hand[aside...]
+
+Always use "typewriter text" (monospace font) when writing function names, and follow with `()`, e.g., 
+
+- `geom_freqpoly()`
+- `mean()`
+- `lm()`
+
+---
+
+## `geom_bar()`
+
+
+```r
+ggplot(duke_forest, aes(x = decade_built_cat)) +
+  geom_bar()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-10-1.png" width="60%" /&gt;
+
+---
+
+## `geom_bar()`
+
+
+```r
+ggplot(duke_forest, aes(y = decade_built_cat)) +
+  geom_bar()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-11-1.png" width="60%" /&gt;
+
+---
+
+## `geom_histogram()`
+
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_histogram()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-12-1.png" width="60%" /&gt;
+
+---
+
+## `geom_histogram()` and `binwidth`
+
+.panelset[
+.panel[.panel-name[20K]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_histogram(binwidth = 20000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-13-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[50K]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_histogram(binwidth = 50000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-14-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[100K]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_histogram(binwidth = 100000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-15-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[200K]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_histogram(binwidth = 200000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-16-1.png" width="60%" /&gt;
+]
+]
+
+---
+
+## `geom_density()`
+
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-17-1.png" width="60%" /&gt;
+
+---
+
+## `geom_density()` and bandwidth (`bw`)
+
+.panelset[
+.panel[.panel-name[1]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density(bw = 1)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-18-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[1000]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density(bw = 1000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-19-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[50000]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density(bw = 50000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-20-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[500000]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density(bw = 500000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-21-1.png" width="60%" /&gt;
+]
+]
+
+---
+
+## `geom_density()` outlines
+
+.panelset[
+.panel[.panel-name[full]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density(outline.type = "full")
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-22-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[both]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density(outline.type = "both")
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-23-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[upper]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density(outline.type = "upper")
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-24-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[lower]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_density(outline.type = "lower")
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-25-1.png" width="60%" /&gt;
+]
+]
+
+---
+
+## `geom_dotplot()`
+
+.task[
+What does each point represent? How are their locations determined? What do the x and y axes represent?
+]
+
+.panelset[
+.panel[.panel-name[Plot]
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_dotplot(binwidth = 50000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-26-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[Discuss]
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+]
+]
+
+<div class="countdown" id="timer_623fddef" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## `geom_freqpoly()`
+
+
+```r
+ggplot(duke_forest, aes(x = price)) +
+  geom_freqpoly(binwidth = 50000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-28-1.png" width="60%" /&gt;
+
+---
+
+## `geom_freqpoly()` for comparisons
+
+.panelset[
+.panel[.panel-name[Histogram]
+
+```r
+ggplot(duke_forest, aes(x = price, fill = decade_built_cat)) +
+  geom_histogram(binwidth = 100000)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-29-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[Frequency polygon]
+
+```r
+ggplot(duke_forest, aes(x = price, color = decade_built_cat)) +
+  geom_freqpoly(binwidth = 100000, size = 1)
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-30-1.png" width="60%" /&gt;
+]
+]
+
+---
+
+## Two variables - both continuous
+
+- `geom_point()`: scatterplot
+- `geom_quantile()`: smoothed quantile regression
+- `geom_rug()`: marginal rug plots
+- `geom_smooth()`: smoothed line of best fit
+- `geom_text()`: text labels
+
+---
+
+## `geom_rug()`
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point() +
+  geom_rug()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-31-1.png" width="60%" /&gt;
+
+---
+
+## `geom_rug()` on the outside
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point() +
+  geom_rug(outside = TRUE) +
+  coord_cartesian(clip = "off")
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-32-1.png" width="60%" /&gt;
+
+---
+
+## `geom_rug()` on the outside, but better
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point() +
+  geom_rug(outside = TRUE, sides = "tr") +
+  coord_cartesian(clip = "off") +
+  theme(plot.margin = margin(1, 1, 1, 1, "cm"))
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-33-1.png" width="60%" /&gt;
+
+---
+
+## `geom_text()`
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_text(aes(label = bed))
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-34-1.png" width="60%" /&gt;
+
+
+---
+
+## `geom_text()` and more
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_text(aes(label = bed, size = bed, color = bed))
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-35-1.png" width="60%" /&gt;
+
+---
+
+## `geom_text()` and even more
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_text(
+    aes(label = bed, size = bed, color = bed),
+    show.legend = FALSE
+  )
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-36-1.png" width="60%" /&gt;
+
+---
+
+## Two variables - show distribution
+
+- `geom_bin2d()`: bin into rectangles and count
+- `geom_density2d()`: smoothed 2d density estimate
+- `geom_hex()`: bin into hexagons and count
+
+---
+
+## `geom_hex()`
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_hex()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-37-1.png" width="60%" /&gt;
+
+---
+
+## `geom_hex()` and warnings
+
+- Requires installing the [**hexbin**](https://cran.r-project.org/web/packages/hexbin/index.html) package separately!
+
+
+```r
+install.packages("hexbin")
+```
+
+- Otherwise you might see
+
+```
+Warning: Computation failed in `stat_binhex()`
+```
+
+---
+
+## Two variables
+
+- At least one discrete
+  - `geom_count()`: count number of point at distinct locations
+  - `geom_jitter()`: randomly jitter overlapping points
+
+- One continuous, one discrete
+  - `geom_col()`: a bar chart of pre-computed summaries
+  - `geom_boxplot()`: boxplots
+  - `geom_violin()`: show density of values in each group
+
+---
+
+## `geom_jitter()`
+
+.task[
+How are the following three plots different?
+]
+
+.panelset[
+.panel[.panel-name[Plot A]
+
+```r
+ggplot(duke_forest, aes(x = bed, y = price)) +
+  geom_point()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-39-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[Plot B]
+
+```r
+ggplot(duke_forest, aes(x = bed, y = price)) +
+  geom_jitter()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-40-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[Plot C]
+
+```r
+ggplot(duke_forest, aes(x = bed, y = price)) +
+  geom_jitter()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-41-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[Discuss]
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+]
+]
+
+<div class="countdown" id="timer_623fdedd" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## `geom_jitter()` and `set.seed()`
+
+.panelset[
+.panel[.panel-name[Plot A]
+
+```r
+set.seed(1234)
+ggplot(duke_forest, aes(x = bed, y = price)) +
+  geom_jitter()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-43-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[Plot B]
+
+```r
+set.seed(1234)
+ggplot(duke_forest, aes(x = bed, y = price)) +
+  geom_jitter()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-44-1.png" width="60%" /&gt;
+]
+]
+
+---
+
+## Two variables
+
+- One time, one continuous
+  - `geom_area()`: area plot
+  - `geom_line()`: line plot
+  - `geom_step()`: step plot
+
+- Display uncertainty:
+  - `geom_crossbar()`: vertical bar with center
+  - `geom_errorbar()`: error bars
+  - `geom_linerange()`: vertical line
+  - `geom_pointrange()`: vertical line with center
+
+- Spatial
+  - `geom_map()`: fast version of `geom_polygon()` for map data (more on this later...)
+
+---
+
+## Average price per year built
+
+
+```r
+mean_price_year &lt;- duke_forest %&gt;%
+  group_by(year_built) %&gt;%
+  summarise(
+    n = n(),
+    mean_price = mean(price),
+    sd_price = sd(price)
+    )
+
+mean_price_year
+```
+
+```
+## # A tibble: 44 × 4
+##    year_built     n mean_price sd_price
+##         &lt;dbl&gt; &lt;int&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+##  1       1923     1     285000      NA 
+##  2       1934     1     600000      NA 
+##  3       1938     1     265000      NA 
+##  4       1940     1     105000      NA 
+##  5       1941     2     432500   28284.
+##  6       1945     2     525000  530330.
+##  7       1951     2     567500  258094.
+##  8       1952     2     531250  469165.
+##  9       1953     2     575000   35355.
+## 10       1954     4     600000   33912.
+## # … with 34 more rows
+```
+
+---
+
+## `geom_line()`
+
+
+```r
+ggplot(mean_price_year, aes(x = year_built, y = mean_price)) +
+  geom_line()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-46-1.png" width="60%" /&gt;
+
+---
+
+## `geom_area()`
+
+
+```r
+ggplot(mean_price_year, aes(x = year_built, y = mean_price)) +
+  geom_area()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-47-1.png" width="60%" /&gt;
+
+---
+
+## `geom_step()`
+
+
+```r
+ggplot(mean_price_year, aes(x = year_built, y = mean_price)) +
+  geom_step()
+```
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-48-1.png" width="60%" /&gt;
+
+---
+
+## `geom_errorbar()`
+
+.task[
+Describe how this plot is constructed and what the points and the lines (error bars) correspond to.
+]
+
+.panelset[
+.panel[.panel-name[Code]
+
+```r
+ggplot(mean_price_year, aes(x = year_built, y = mean_price)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = mean_price - sd_price,
+                    ymax = mean_price + sd_price))
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-49-1.png" width="60%" /&gt;
+]
+.panel[.panel-name[Discuss]
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+]
+]
+
+<div class="countdown" id="timer_623fdd22" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## Let's clean things up a bit!
+
+Meet your new best friend, the [**scales**](https://scales.r-lib.org/) package!
+
+
+```r
+library(scales)
+```
+
+---
+
+## Let's clean things up a bit!
+
+.panelset[
+.panel[.panel-name[Code]
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_point(alpha = 0.6, size = 2, color = "#012169") +
+  scale_x_continuous(labels = label_number(big.mark = ",")) +
+  scale_y_continuous(labels = label_dollar(scale = 1/1000, suffix = "K")) +
+  labs(
+    x = "Area (square feet)",
+    y = "Sale price (USD)",
+    title = "Sale prices of homes in Duke Forest",
+    subtitle = "As of November 2020",
+    caption = "Source: Zillow.com"
+  )
+```
+
+
+
+]
+
+.panel[.panel-name[Plot]
+
+&lt;img src="03-geoms_files/figure-html/unnamed-chunk-52-1.png" width="60%" /&gt;
+
+]
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"slideNumberFormat": "%current%",
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
