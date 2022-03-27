@@ -848,3 +848,9 @@ class: middle
 - Tidy Tuesday: https://github.com/rfordatascience/tidytuesday
 
 - Collection of Tidy Tuesday posts by Silvia Canelón: https://www.notion.so/Data-Viz-Bookmarks-dc01718020bd4fd6a8a4ca80e6bce933
+
+---
+
+.task[
+Create a reprex for a plot made with ggplot2.
+]
