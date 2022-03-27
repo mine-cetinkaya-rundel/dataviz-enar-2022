@@ -1137,22 +1137,6 @@ p_covid_linear_patch_25 + p_covid_log_patch_25 +
 
 ---
 
-class: middle, inverse
-
-# visualizion .hand[resources]
-
----
-
-## Resources
-
-- Books:
-  - [Data Visualization: A practical introduction](https://socviz.co/) by Kieran Healy
-  - [Fundamentals of Data Visualization](https://clauswilke.com/dataviz/) by Claus O. Wilke
-  - [How charts lie](http://www.thefunctionalart.com/p/reviews.html) by Alberto Cairo
-  - [Presenting Data Effectively](https://stephanieevergreen.com/books/) by Stephanie Evergreen
-  - [Datavision](https://www.amazon.com/Datavision-2-David-McCandless/dp/2221145925) by David McCandless
-  
-- Community: [Data Visualization Society](https://www.datavisualizationsociety.org/resources)
-
-- Tools: All visualizations presented have been created with [R](https://cran.r-project.org/) and [ggplot2](https://ggplot2.tidyverse.org/)
-  - For those who are interested, the source code can be found [here](https://github.com/mine-cetinkaya-rundel/2021-data-viz-nc)
+.task[
+Go to RStudio Cloud and recreate these two plots, changing one of the countries for a country of your choice.
+]
