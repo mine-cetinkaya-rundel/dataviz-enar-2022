@@ -102,7 +102,7 @@ set.seed(1234)
 
 class: middle, inverse
 
-# 🔗 [bit.ly/dataviz-enar-2022](https://bit.ly/dataviz-enar-2022 )
+# 🔗 [bit.ly/dataviz-enar-2022](https://bit.ly/dataviz-enar-2022)
 
 ---
 
