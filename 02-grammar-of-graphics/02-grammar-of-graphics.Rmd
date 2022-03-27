@@ -1046,14 +1046,6 @@ knitr::include_graphics("images/sketch.png")
 
 ---
 
-## Asking good questions
-
-- Describe what you want
-- Describe where you are
-- Create a minimal **repr**oducible **ex**ample: `reprex::reprex()`
-
----
-
 .panelset[
 .panel[.panel-name[Plot]
 
@@ -1594,3 +1586,24 @@ countdown(minutes = 3, bottom = 0)
 .task[
 Think back to all the plots you saw in the lecture, without flipping back through the slides. Which plot first comes to mind? Describe it in words.
 ]
+
+---
+
+.task[
+Change the theme of the following plot to something else. 
+See https://ggplot2.tidyverse.org/reference/theme.html for options.
+Make other improvements as you see fit.
+]
+
+```{r echo = FALSE}
+ggplot(duke_forest, aes(x = area, y = price, color = decade_built_cat)) +
+  geom_point(alpha = 0.7, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, size = 0.5, show.legend = FALSE) +
+  facet_wrap(~decade_built_cat) +
+  labs(
+    x = "Area (square feet)",
+    y = "Sale price (USD)",
+    color = "Decade built",
+    title = "Price and area of houses in Duke Forest",
+  )
+```
