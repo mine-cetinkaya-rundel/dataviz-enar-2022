@@ -28,6 +28,10 @@ This workshop is all about the art and science of visualizing data with R. Learn
 | 14:50 - 15:00 | *Break*          |
 | 16:00 - 17:00 | [Module 4 - Geoms](https://mine-cetinkaya-rundel.github.io/dataviz-enar-2022/04-stats-scales-guides/04-stats-scales-guidess.html#1)        |
 
+## RStudio Cloud
+
+To follow along with the exercises, open and make a permanent copy of the RStudio Cloud project at https://rstudio.cloud/project/3796661.
+
 ## Instructor
 
 Mine Çetinkaya-Rundel is Professor of the Practice at the Department of Statistical Science at Duke University and Developer Educator at RStudio. Mine’s work focuses on innovation in statistics and data science pedagogy, with an emphasis on computing, reproducible research, student-centered learning, and open-source education as well as pedagogical approaches for enhancing retention of women and under-represented minorities in STEM. Mine works on integrating computation into the undergraduate statistics curriculum, using reproducible research methodologies and analysis of real and complex datasets. She also organizes ASA DataFest, an annual two-day competition in which teams of undergraduate students work to reveal insights into a rich and complex dataset. Mine has been working on the OpenIntro project since its founding and as part of this project she co-authored four open-source introductory statistics textbooks, including the newly published Introduction to Modern Statistics. She is also the creator and maintainer of datasciencebox.org and she teaches the popular Statistics with R MOOC on Coursera.
