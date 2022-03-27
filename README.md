@@ -20,13 +20,13 @@ This workshop is all about the art and science of visualizing data with R. Learn
 
 | Time          | Activity         |
 | :------------ | :--------------- |
-| 13:00 - 13:50 | Session 1        |
+| 13:00 - 13:50 | [Module 1 - Intro](https://mine-cetinkaya-rundel.github.io/dataviz-enar-2022/01-intro/01-intro.html#1)        |
 | 13:50 - 14:00 | *Break*          |
-| 14:00 - 14:50 | Session 2        |
+| 14:00 - 14:50 | [Module 2 - Grammar of graphics](https://mine-cetinkaya-rundel.github.io/dataviz-enar-2022/02-grammar-of-graphics/02-grammar-of-graphics.html#1)       |
 | 14:50 - 15:00 | *Break*          |
-| 15:00 - 14:50 | Session 3        |
+| 15:00 - 14:50 | [Module 3 - Geoms](https://mine-cetinkaya-rundel.github.io/dataviz-enar-2022/03-geoms/03-geoms.html#1)        |
 | 14:50 - 15:00 | *Break*          |
-| 16:00 - 17:00 | Session 4        |
+| 16:00 - 17:00 | [Module 4 - Geoms](https://mine-cetinkaya-rundel.github.io/dataviz-enar-2022/04-stats-scales-guides/04-stats-scales-guidess.html#1)        |
 
 ## Instructor
 
