@@ -139,9 +139,7 @@ knitr::opts_chunk$set(
 ---
 
 ## Data prep: new variables
-
-From last class...
-
+ 
 ```{r}
 duke_forest <- duke_forest %>%
   mutate(
@@ -161,8 +159,6 @@ duke_forest %>%
 ---
 
 ## Data prep: summary table
-
-From last class...
 
 ```{r}
 mean_area_decade <- duke_forest %>%
