@@ -87,6 +87,14 @@ style_duo_accent(
 
 class: middle, inverse
 
+# 🔗 [bit.ly/dataviz-enar-2022](https://bit.ly/dataviz-enar-2022)
+
+To follow along with the exercises, open and make a permanent copy of the RStudio Cloud project at https://rstudio.cloud/project/3796661.
+
+---
+
+class: middle, inverse
+
 # Data visualization
 
 ---
