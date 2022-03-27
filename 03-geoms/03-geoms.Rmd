@@ -172,80 +172,6 @@ mean_area_decade
 
 class: middle, inverse
 
-# Aesthetic mappings in ggplot2
-
----
-
-## Global vs. layer-specific aesthetics
-
-- Aesthetic mappings can be supplied in the initial `ggplot()` call, in individual layers, or in some combination of both.
-
-- Within each layer, you can add, override, or remove mappings.
-
-- If you only have one layer in the plot, the way you specify aesthetics doesn’t make any difference. However, the distinction is important when you start adding additional layers.
-
----
-
-## Activity: Spot the difference I
-
-.task[
-Do you expect the following plots to be the same or different? If different, how? Discuss in a pair (or group) without running the code and sketch the resulting plots based on what you think the code will produce.
-]
-
-.panelset[
-.panel[.panel-name[Plots]
-```{r fig.show = "hide"}
-# Plot A
-ggplot(duke_forest, aes(x = area, y = price, color = decade_built_cat)) +
-  geom_point(alpha = 0.7) +
-  geom_smooth(method = "lm", se = FALSE, size = 0.5)
-
-# Plot B
-ggplot(duke_forest, aes(x = area, y = price)) +
-  geom_point(aes(color = decade_built_cat), alpha = 0.7) +
-  geom_smooth(method = "lm", se = FALSE, size = 0.5)
-```
-]
-]
-
-```{r echo = FALSE}
-countdown(minutes = 5, bottom = 0)
-```
-
----
-
-## Activity: Spot the difference II
-
-.task[
-Do you expect the following plots to be the same or different? If different, how? Discuss in a pair (or group) without running the code and sketch the resulting plots based on what you think the code will produce.
-]
-
-.panelset[
-.panel[.panel-name[Plots]
-```{r fig.show = "hide"}
-# Plot A
-ggplot(duke_forest, aes(x = area, y = price)) +
-  geom_point(aes(color = decade_built_cat))
-
-# Plot B
-ggplot(duke_forest, aes(x = area, y = price)) +
-  geom_point(color = "blue")
-
-# Plot C
-ggplot(duke_forest, aes(x = area, y = price)) +
-  geom_point(color = "#a493ba")
-```
-]
-]
-
-```{r echo = FALSE}
-countdown(minutes = 3, bottom = 0)
-```
-
----
-
-class: middle, inverse
-
 # Geoms
 
 ---
@@ -743,4 +669,10 @@ ggplot(duke_forest, aes(x = area, y = price)) +
     caption = "Source: Zillow.com"
   )
 ```
+]
+
+---
+
+.task[
+Find a new geom that we haven't introduced so far and use it to visualize the `duke_forest` data.
 ]
