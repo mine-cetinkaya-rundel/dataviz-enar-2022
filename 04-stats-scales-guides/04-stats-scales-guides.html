@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>04 - stats + scales + guides</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="  dr. mine çetinkaya-rundel   duke university &amp; rstudio" />
+    <script src="04-stats-scales-guides_files/header-attrs/header-attrs.js"></script>
+    <link href="04-stats-scales-guides_files/panelset/panelset.css" rel="stylesheet" />
+    <script src="04-stats-scales-guides_files/panelset/panelset.js"></script>
+    <link href="04-stats-scales-guides_files/countdown/countdown.css" rel="stylesheet" />
+    <script src="04-stats-scales-guides_files/countdown/countdown.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# 04 - stats + scales + guides
+## Data visualization in R
+### <br> dr. mine çetinkaya-rundel <br> duke university &amp; rstudio
+
+---
+
+
+
+
+
+
+class: middle, inverse
+
+# Workflow notes
+
+---
+
+## IDE
+
+- Plots panel:
+  - Avoiding the `Error in plot.new() : figure margins too large` error
+  - Zooming in
+- Panel layout
+- Themes
+
+---
+
+## Code style: ggplot2
+
+- Line breaks after `+`
+- Spaces around ` = `
+- Otherwise spacing around punctuation as you would in English
+  - Space after `, `
+  - No space around `(` and `)`
+- Indent all lines after `ggplot()`
+
+
+```r
+# bad
+ggplot(mtcars, aes(x=mpg,y =disp))+
+geom_point()
+
+# bad
+ggplot(mtcars, aes(x=mpg,y =disp))+geom_point()
+
+# good
+ggplot(mtcars, aes(x = mpg, y = disp)) +
+  geom_point()
+```
+
+---
+
+## Code style: comments
+
+- Place comment above the relevant code
+- Short comments can be placed in the same line as well
+
+
+```r
+# good
+ggplot(mtcars, aes(x = mpg, y = disp)) +
+  geom_point() # points (short comment)
+
+# good
+# scatterplot of mpg vs. disp (long comment)
+ggplot(mtcars, aes(x = mpg, y = disp)) +
+  geom_point()
+
+# bad
+ggplot(mtcars, aes(x = mpg, y = disp)) +
+  geom_point()
+  # above code plots mpg vs. disp
+```
+
+---
+
+class: inverse, middle
+
+# Setup
+
+---
+
+## Packages + figures
+
+
+```r
+# load packages
+library(tidyverse)
+library(openintro)
+
+# set default theme for ggplot2
+ggplot2::theme_set(ggplot2::theme_minimal(base_size = 16))
+
+# set default figure parameters for knitr
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.asp = 0.618,
+  fig.retina = 3,
+  dpi = 300,
+  out.width = "60%"
+)
+```
+
+---
+
+## Data prep
+
+
+```r
+duke_forest &lt;- openintro::duke_forest %&gt;%
+  mutate(
+    decade_built = (year_built %/% 10) * 10,
+    decade_built_cat = case_when(
+      decade_built &lt;= 1940 ~ "1940 or before",
+      decade_built &gt;= 1990 ~ "1990 or after",
+      TRUE                 ~ as.character(decade_built)
+    ),
+    decade_built_cat = factor(decade_built_cat, ordered = TRUE)
+  )
+```
+
+---
+
+## New data prep: `parking`
+
+.small[
+
+```r
+duke_forest %&gt;%
+  distinct(parking) %&gt;%
+  print(n = 20)
+```
+
+```
+## # A tibble: 19 × 1
+##    parking                                                  
+##    &lt;chr&gt;                                                    
+##  1 0 spaces                                                 
+##  2 Carport, Covered                                         
+##  3 Garage - Attached, Covered                               
+##  4 Off-street, Covered                                      
+##  5 Carport, Garage - Attached, Covered                      
+##  6 Covered                                                  
+##  7 Garage, Garage - Detached, Covered                       
+##  8 Garage - Attached, On-street, Covered                    
+##  9 Garage, Garage - Attached, Covered                       
+## 10 Off-street                                               
+## 11 Garage, Garage - Detached, Off-street                    
+## 12 Garage - Attached                                        
+## 13 Garage, Carport, Covered                                 
+## 14 Garage                                                   
+## 15 Garage - Detached, Off-street, Covered                   
+## 16 Garage - Attached, Garage - Detached, Covered            
+## 17 Garage, Garage - Detached, Off-street, On-street, Covered
+## 18 Garage, Garage - Detached, Off-street, Covered           
+## 19 Garage - Attached, Off-street, Covered
+```
+]
+
+---
+
+## Recode `parking`
+
+
+```r
+duke_forest &lt;- duke_forest %&gt;%
+  mutate(
+    parking = case_when(
+      parking == "0 spaces" ~ "Street",
+      str_detect(parking, "Carport") ~ "Carport",
+      str_detect(parking, "Garage") ~ "Garage",
+      str_detect(parking, "Covered") ~ "Covered",
+      TRUE ~ parking
+    )
+  )
+
+duke_forest %&gt;% 
+  count(parking)
+```
+
+```
+## # A tibble: 5 × 2
+##   parking        n
+##   &lt;chr&gt;      &lt;int&gt;
+## 1 Carport       16
+## 2 Covered        6
+## 3 Garage        33
+## 4 Off-street     1
+## 5 Street        42
+```
+
+---
+
+class: middle, inverse
+
+.large[.hand[wrap up...]]
+
+# geoms
+
+---
+
+## Three variables
+
+- `geom_contour()`: contours
+- `geom_tile()`: tile the plane with rectangles
+- `geom_raster()`: fast version of `geom_tile()` for equal sized tiles
+
+---
+
+## `geom_tile()`
+
+
+```r
+ggplot(duke_forest, aes(x = bed, y = bath)) +
+ geom_tile(aes(fill = price))
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-7-1.png" width="60%" /&gt;
+
+---
+
+## Another look at smooth-ish surface
+
+.panelset[
+.panel[.panel-name[Summarize]
+.small[
+
+```r
+mean_price_bed_bath &lt;- duke_forest %&gt;%
+  group_by(bed, bath) %&gt;%
+  summarize(mean_price = mean(price), .groups = "drop")
+
+mean_price_bed_bath
+```
+
+```
+## # A tibble: 19 × 3
+##      bed  bath mean_price
+##    &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;
+##  1     2   1      105000 
+##  2     2   2      436000 
+##  3     2   3      420000 
+##  4     3   1      174750 
+##  5     3   2      444917.
+##  6     3   2.5    447500 
+##  7     3   3      512682.
+##  8     3   4     1039500 
+##  9     4   2      477000 
+## 10     4   2.5    597000 
+## 11     4   3      523767.
+## 12     4   4      678539.
+## 13     4   4.5     95000 
+## 14     4   5      711250 
+## 15     5   3      519500 
+## 16     5   4      657800 
+## 17     5   5     1010000 
+## 18     5   6      915000 
+## 19     6   5     1250000
+```
+]
+]
+.panel[.panel-name[Plot]
+
+```r
+ggplot(mean_price_bed_bath, aes(x = bed, y = bath)) +
+  geom_point(aes(color = mean_price), size = 10, pch = "square")
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-9-1.png" width="60%" /&gt;
+]
+]
+
+---
+
+## Activity: Pick a geom
+
+.task[
+For each of the following problems, suggest a useful geom:
+
+1. Display how the value of variable has changed over time
+1. Show the detailed distribution of a single continuous variable
+1. Focus attention on the overall relationship between two variables in a large dataset
+1. Label outlying points in a single variable
+]
+
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+
+<div class="countdown" id="timer_623fe0bc" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+class: middle, inverse
+
+# Stats
+
+---
+
+## Stats &lt; &gt; geoms
+
+- Statistical transformation (**stat**) transforms the data, typically by summarizing
+- Many of ggplot2’s stats are used behind the scenes to generate many important geoms
+
+|`stat`            | geom              |
+|------------------|-------------------|
+|`stat_bin()`      | `geom_bar()`, `geom_freqpoly()`, `geom_histogram()` |
+|`stat_bin2d()`    | `geom_bin2d()`    |
+|`stat_bindot()`   | `geom_dotplot()`  |
+|`stat_binhex()`   | `geom_hex()`      |
+|`stat_boxplot()`  | `geom_boxplot()`  |
+|`stat_contour()`  | `geom_contour()`  |
+|`stat_quantile()` | `geom_quantile()` |
+|`stat_smooth()`   | `geom_smooth()`   |
+|`stat_sum()`      | `geom_count()`    |
+
+---
+
+## `stat_boxplot()`
+
+&lt;img src="images/summary-stats.png" title="Documentation for `stat_boxplot()`." alt="Documentation for `stat_boxplot()`." width="90%" /&gt;
+
+---
+
+## Layering with stats
+
+
+```r
+ggplot(duke_forest, aes(x = parking, y = price)) + 
+  geom_point(alpha = 0.5) + 
+* stat_summary(geom = "point", fun = "median", colour = "red", size = 5, pch = 4, stroke = 2)
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-12-1.png" width="60%" /&gt;
+
+---
+
+## Alternate: layering with stats
+
+
+```r
+ggplot(duke_forest, aes(x = parking, y = price)) + 
+  geom_point(alpha = 0.5) + 
+* geom_point(stat = "summary", fun = "median", colour = "red", size = 5, pch = 4, stroke = 2)
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-13-1.png" width="60%" /&gt;
+
+---
+
+## Statistical transformations
+
+.task[
+What can you say about the distribution of price from the following QQ plot?
+]
+
+.small[
+
+```r
+ggplot(duke_forest, aes(sample = price)) +
+* stat_qq() +
+* stat_qq_line() +
+  labs(y = "price")
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-14-1.png" width="50%" /&gt;
+]
+
+---
+
+class: middle, inverse
+
+# Scales
+
+---
+
+## What is a scale?
+
+- Each scale is a function from a region in data space (the domain of the scale) to a region in aesthetic space (the range of the scale)
+
+- The axis or legend is the inverse function: it allows you to convert visual properties back to data
+
+---
+
+## Scale specification
+
+Every aesthetic in your plot is associated with exactly one scale:
+
+.panelset[
+.panel[.panel-name[Code]
+
+```r
+# automatic scales
+ggplot(duke_forest, aes(x = area, y = price, color = parking)) + 
+  geom_point(alpha = 0.8)
+```
+
+```r
+# manual scales
+ggplot(duke_forest, aes(x = area, y = price, color = parking)) + 
+  geom_point(alpha = 0.8) +
+  scale_x_continuous() + 
+  scale_y_continuous() + 
+  scale_colour_ordinal()
+```
+]
+.panel[.panel-name[Plot]
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-16-1.png" width="60%" /&gt;
+]
+]
+
+---
+
+## Anatomy of a scale function
+
+.large[
+.center[
+`scale_A_B()`
+]
+]
+
+- Always starts with `scale`
+- `A`: Name of the primary aesthetic (e.g., `colour`, `shape`, `x`)
+- `B`: Name of the scale (e.g., `continuous`, `discrete`, `brewer`)
+
+---
+
+## Guess the output
+
+.task[
+What will the x-axis label of the following plot say?
+]
+
+.panelset[
+.panel[.panel-name[Plots]
+
+```r
+ggplot(duke_forest, aes(x = area, y = price, color = parking)) + 
+  geom_point(alpha = 0.8) +
+  scale_x_continuous(name = "Area") +
+  scale_x_continuous(name = "Area (sq ft)") 
+```
+]
+.panel[.panel-name[Vote]
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+]
+]
+
+<div class="countdown" id="timer_623fe1ee" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">02</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## "Address" messages
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price, color = parking)) + 
+  geom_point(alpha = 0.8) +
+  scale_x_continuous(name = "Area") +
+  scale_x_continuous(name = "Area (sq ft)") 
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-19-1.png" width="50%" /&gt;
+
+---
+
+## Guess the output
+
+.task[
+What happens if you pair a discrete variable with a continuous scale? What happens if you pair a continuous variable with a discrete scale? Answer in the context of the following plots.
+]
+
+.panelset[
+.panel[.panel-name[Plots]
+
+```r
+ggplot(duke_forest, aes(x = parking, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_x_continuous()
+
+ggplot(duke_forest, aes(x = parking, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_y_discrete()
+```
+]
+.panel[.panel-name[Discuss]
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+]
+]
+
+<div class="countdown" id="timer_623fe32c" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## Transformations
+
+When working with continuous data, the default is to map linearly from the data space onto the aesthetic space, but this scale can be transformed
+
+.panelset[
+.panel[.panel-name[Linear]
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5)
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-22-1.png" width="45%" /&gt;
+]
+.panel[.panel-name[Transformed]
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_y_continuous(trans = "log10")
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-23-1.png" width="45%" /&gt;
+]
+]
+
+---
+
+## Continuous scale transformations
+
+| Name      | Function `\(f(x)\)`         | Inverse `\(f^{-1}(y)\)`
+|-----------|-------------------------|------------------------
+| asn       | `\(\tanh^{-1}(x)\)`         | `\(\tanh(y)\)`
+| exp       | `\(e ^ x\)`                 | `\(\log(y)\)`
+| identity  | `\(x\)`                     | `\(y\)`
+| log       | `\(\log(x)\)`               | `\(e ^ y\)`
+| log10     | `\(\log_{10}(x)\)`          | `\(10 ^ y\)`
+| log2      | `\(\log_2(x)\)`             | `\(2 ^ y\)`
+| logit     | `\(\log(\frac{x}{1 - x})\)` | `\(\frac{1}{1 + e(y)}\)`
+| pow10     | `\(10^x\)`                  | `\(\log_{10}(y)\)`
+| probit    | `\(\Phi(x)\)`               | `\(\Phi^{-1}(y)\)`
+| reciprocal| `\(x^{-1}\)`                | `\(y^{-1}\)`
+| reverse   | `\(-x\)`                    | `\(-y\)`
+| sqrt      | `\(x^{1/2}\)`               | `\(y ^ 2\)`
+
+---
+
+## Convenience functions for transformations
+
+.pull-left[
+
+```r
+ggplot(duke_forest, 
+       aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_y_continuous(trans = "log10")
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-24-1.png" width="100%" /&gt;
+]
+.pull-right[
+
+```r
+ggplot(duke_forest, 
+       aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_y_log10()
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-25-1.png" width="100%" /&gt;
+]
+
+---
+
+## Scale transform vs. data transform
+
+.task[
+How are the following two plots different, how are they similar? What does this say about how scale transformations work.
+]
+
+.panelset[
+.panel[.panel-name[Plot A]
+.pull-left[
+
+```r
+duke_forest %&gt;%
+  mutate(price_log10 = log(price, base = 10)) %&gt;%
+  ggplot(aes(x = area, y = price_log10)) + 
+  geom_point(alpha = 0.5)
+```
+]
+.pull-right[
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-26-1.png" width="100%" /&gt;
+]
+]
+.panel[.panel-name[Plot B]
+.pull-left[
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_y_log10()
+```
+]
+.pull-right[
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-27-1.png" width="100%" /&gt;
+]
+]
+.panel[.panel-name[Discuss]
+&lt;iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"&gt;&lt;/iframe&gt;
+]
+]
+
+<div class="countdown" id="timer_623fe0d1" style="bottom:0;left:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">05</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+class: middle, inverse
+
+# Guides
+
+---
+
+## What is a guide?
+
+Guides are legends and axes:
+
+&lt;img src="images/scale-guides.png" title="Common components of axes and legends" alt="Common components of axes and legends" width="80%" /&gt;
+
+.foonote[
+Source: ggplot2: Elegant Graphics for Data Analysis, [Chp 15](https://ggplot2-book.org/scales-guides.html#scale-guide).
+]
+
+---
+
+## Customizing axes
+
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_x_continuous(
+*   name = "Area (sq ft)"
+  )
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-30-1.png" width="60%" /&gt;
+
+---
+
+## Customizing axes
+
+.task[
+Why does 7000 not appear on the x-axis?
+]
+
+.small[
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_x_continuous(
+    name = "Area (sq ft)",
+*   breaks = seq(from = 1000, to = 7000, by = 1000)
+  )
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-31-1.png" width="50%" /&gt;
+]
+
+---
+
+## Customizing axes
+
+.small[
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_x_continuous(
+    name = "Area (sq ft)",
+    breaks = seq(from = 1000, to = 7000, by = 1000),
+*   limits = c(1000, 7000)
+  )
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-32-1.png" width="50%" /&gt;
+]
+
+---
+
+## Customizing axes
+
+.small[
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_x_continuous(
+    name = "Area (sq ft)",
+    breaks = seq(from = 1000, to = 7000, by = 1000),
+    limits = c(1000, 7000),
+*   labels = c("1,000", "2,000", "3,000", "4,000", "5,000", "6,000", "7,000")
+  )
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-33-1.png" width="50%" /&gt;
+]
+
+---
+
+## Customizing axes
+
+.small[
+
+```r
+library(scales)
+
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+* scale_x_continuous(
+*   name = "Area (sq ft)",
+*   breaks = seq(from = 1000, to = 7000, by = 1000),
+*   limits = c(1000, 7000),
+*   labels = label_number(big.mark = ",")
+* )
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-34-1.png" width="50%" /&gt;
+]
+
+----
+
+## Customizing axes
+
+.small[
+
+```r
+ggplot(duke_forest, aes(x = area, y = price)) + 
+  geom_point(alpha = 0.5) +
+  scale_x_continuous(
+    name = "Area (sq ft)",
+    breaks = seq(from = 1000, to = 7000, by = 1000),
+    limits = c(1000, 7000),
+    labels = label_number(big.mark = ",")
+  ) +
+* scale_y_continuous(
+*   name = "Price (USD)",
+*   labels = label_dollar()
+* )
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-35-1.png" width="60%" /&gt;
+]
+
+---
+
+## Aside: saving a plot
+
+
+```r
+set.seed(1234)
+
+p_area_price_parking &lt;- ggplot(duke_forest, aes(x = area, y = price)) +
+  geom_jitter(aes(color = parking, shape = parking), size = 2)
+
+p_area_price_parking
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-36-1.png" width="60%" /&gt;
+
+---
+
+## Customizing axis and legend labels with `scale_*()`
+
+.small[
+
+```r
+p_area_price_parking +
+* scale_x_continuous(name = "Area (sq ft)") +
+* scale_y_continuous(name = "Price (USD)") +
+* scale_color_discrete(name = "Parking") +
+* scale_shape_discrete(name = "Parking")
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-37-1.png" width="60%" /&gt;
+]
+
+---
+
+## Customizing axis and legend labels with `labs()`
+
+.small[
+
+```r
+p_area_price_parking +
+* labs(
+*   x = "Area (sq ft)",
+*   y = "Price (USD)",
+*   color = "Parking",
+*   shape = "Parking",
+  )
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-38-1.png" width="60%" /&gt;
+]
+
+---
+
+## Splitting legend labels
+
+.small[
+
+```r
+p_area_price_parking +
+  labs(
+    x = "Area (sq ft)",
+    y = "Price (USD)",
+    color = "Parking"
+  )
+```
+
+&lt;img src="04-stats-scales-guides_files/figure-html/unnamed-chunk-39-1.png" width="60%" /&gt;
+]
+
+---
+
+class: middle
+
+# Learn more
+
+---
+
+## Learn more: Videos
+
+- ggplot2 workshop by Thomas Lin Pedersen:
+  - [Part 1](https://www.youtube.com/watch?v=h29g21z0a68)
+  - [Part 2](https://www.youtube.com/watch?v=0m4yywqNPVY)
+
+- Kara Woo - [Always look on the bright side of plots](https://www.youtube.com/watch?v=izV-qK3nlhA&amp;ab_channel=RStudio) (rstudio::global(2021))
+
+- Athanasia Monika Mowinckel - [Zhoosh up your ggplots!](https://www.youtube.com/watch?v=DcUZO-d5JmY&amp;t=4s&amp;ab_channel=R-LadiesGlobalR-LadiesGlobal)
+
+---
+
+## Learn more: Books
+
+- [ggplot2: elegant graphics for data analysis](https://ggplot2-book.org/) by Hadley Wickham, Danielle Navarro, and Thomas Lin Pedersen
+
+- [Fundamentals of Data Visualization](https://clauswilke.com/dataviz/) by Claus O. Wilke
+
+- [Data Visualization: A practical introduction](https://socviz.co/) by Kieran Healy
+
+---
+
+## Learn more: Courses
+
+- Introductory: [Data Science in a Box](https://datasciencebox.org/exploring-data.html#slides-videos-and-application-exercises-1) by Mine Çetinkaya-Rundel
+
+- Intermediate: [Data Visualization in R](https://wilkelab.org/SDS375/) by Claus O. Wilke
+
+---
+
+## Learn more: Interactive
+
+- RStudio primers: [Data visualization](https://rstudio.cloud/learn/primers/3) 
+
+- OpenIntro: [Summarizing and visualizing data](https://openintrostat.github.io/ims-tutorials/02-summarizing-and-visualizing-data/)
+
+---
+
+## Getting help
+
+- [ggplot2.tidyverse.org](http://ggplot2.tidyverse.org/)
+
+- [ggplot2 cheat sheet](https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf)
+
+---
+
+## Community
+
+- Tidy Tuesday: https://github.com/rfordatascience/tidytuesday
+
+- Collection of Tidy Tuesday posts by Silvia Canelón: https://www.notion.so/Data-Viz-Bookmarks-dc01718020bd4fd6a8a4ca80e6bce933
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"slideNumberFormat": "%current%",
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
