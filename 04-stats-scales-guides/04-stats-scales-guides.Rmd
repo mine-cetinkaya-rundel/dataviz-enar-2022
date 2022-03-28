@@ -293,8 +293,6 @@ For each of the following problems, suggest a useful geom:
 1. Label outlying points in a single variable
 ]
 
-<iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"></iframe>
-
 ```{r echo = FALSE}
 countdown(minutes = 3, bottom = 0)
 ```
@@ -434,19 +432,12 @@ ggplot(duke_forest, aes(x = area, y = price, color = parking)) +
 What will the x-axis label of the following plot say?
 ]
 
-.panelset[
-.panel[.panel-name[Plots]
 ```{r fig.show = "hide", message = FALSE}
 ggplot(duke_forest, aes(x = area, y = price, color = parking)) + 
   geom_point(alpha = 0.8) +
   scale_x_continuous(name = "Area") +
   scale_x_continuous(name = "Area (sq ft)") 
 ```
-]
-.panel[.panel-name[Vote]
-<iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"></iframe>
-]
-]
 
 ```{r echo = FALSE}
 countdown(minutes = 2, bottom = 0)
@@ -471,8 +462,6 @@ ggplot(duke_forest, aes(x = area, y = price, color = parking)) +
 What happens if you pair a discrete variable with a continuous scale? What happens if you pair a continuous variable with a discrete scale? Answer in the context of the following plots.
 ]
 
-.panelset[
-.panel[.panel-name[Plots]
 ```{r eval = FALSE}
 ggplot(duke_forest, aes(x = parking, y = price)) + 
   geom_point(alpha = 0.5) +
@@ -482,11 +471,6 @@ ggplot(duke_forest, aes(x = parking, y = price)) +
   geom_point(alpha = 0.5) +
   scale_y_discrete()
 ```
-]
-.panel[.panel-name[Discuss]
-<iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"></iframe>
-]
-]
 
 ```{r echo = FALSE}
 countdown(minutes = 3, bottom = 0)
@@ -588,10 +572,6 @@ ggplot(duke_forest, aes(x = area, y = price)) +
 .pull-right[
 ```{r ref.label = "scale-transform", echo = FALSE, out.width = "100%"}
 ```
-]
-]
-.panel[.panel-name[Discuss]
-<iframe src="https://app.sli.do/event/rxg9buzy" height="100%" width="100%" frameBorder="0" style="min-height: 560px;" title="Slido"></iframe>
 ]
 ]
 

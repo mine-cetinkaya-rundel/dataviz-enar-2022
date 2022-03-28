@@ -875,7 +875,7 @@ ggplot(
 
 .panelset[
 .panel[.panel-name[Plot]
-```{r ref.label = "facet-color-legend", echo = FALSE, warning = FALSE}
+```{r ref.label = "facet-color-no-legend", echo = FALSE, warning = FALSE}
 ```
 ]
 .panel[.panel-name[Code]
