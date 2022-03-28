@@ -26,7 +26,7 @@ This workshop is all about the art and science of visualizing data with R. Learn
 | 14:50 - 15:00 | *Break*          |
 | 15:00 - 14:50 | [Module 3 - Geoms](https://mine-cetinkaya-rundel.github.io/dataviz-enar-2022/03-geoms/03-geoms.html#1)        |
 | 14:50 - 15:00 | *Break*          |
-| 16:00 - 17:00 | [Module 4 - Geoms](https://mine-cetinkaya-rundel.github.io/dataviz-enar-2022/04-stats-scales-guides/04-stats-scales-guides.html#1)        |
+| 16:00 - 17:00 | [Module 4 - Stats, scales, and guides](https://mine-cetinkaya-rundel.github.io/dataviz-enar-2022/04-stats-scales-guides/04-stats-scales-guides.html#1)        |
 
 ## RStudio Cloud
 
